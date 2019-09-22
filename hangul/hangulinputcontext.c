@@ -454,6 +454,41 @@ hangul_buffer_backspace(HangulBuffer *buffer)
     return false;
 }
 
+static bool
+hangul_buffer_backspace_gureum(HangulBuffer *buffer)
+{
+    if (buffer->index >= 0) {
+        if (hangul_is_jungseong(buffer->state)) {
+            buffer->state = 0;
+            return true;
+        }
+        ucschar ch = hangul_buffer_pop(buffer);
+        if (ch == 0)
+            return false;
+        if (buffer->index >= 0) {
+            if (hangul_is_choseong(ch)) {
+                ch = hangul_buffer_peek(buffer);
+                buffer->choseong = hangul_is_choseong(ch) ? ch : 0;
+                return true;
+            } else if (hangul_is_jungseong(ch)) {
+                ch = hangul_buffer_peek(buffer);
+                buffer->jungseong = hangul_is_jungseong(ch) ? ch : 0;
+                return true;
+            } else if (hangul_is_jongseong(ch)) {
+                ch = hangul_buffer_peek(buffer);
+                buffer->jongseong = hangul_is_jongseong(ch) ? ch : 0;
+                return true;
+            }
+        } else {
+            buffer->choseong = 0;
+            buffer->jungseong = 0;
+            buffer->jongseong = 0;
+            return true;
+        }
+    }
+    return false;
+}
+
 static inline bool
 hangul_ic_push(HangulInputContext *hic, ucschar c)
 {
@@ -1457,7 +1492,7 @@ hangul_ic_backspace(HangulInputContext *hic)
     hic->preedit_string[0] = 0;
     hic->commit_string[0] = 0;
 
-    ret = hangul_buffer_backspace(&hic->buffer);
+    ret = hangul_buffer_backspace_gureum(&hic->buffer);
     if (ret)
 	hangul_ic_save_preedit_string(hic);
     return ret;
