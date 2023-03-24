@@ -51,6 +51,7 @@ bool hangul_is_syllable(ucschar c);
 bool hangul_is_jamo(ucschar c);
 bool hangul_is_cjamo(ucschar c);
 
+ucschar hangul_vkeycode_to_keycode(ucschar c);
 ucschar hangul_jamo_to_cjamo(ucschar ch);
 
 const ucschar* hangul_syllable_iterator_prev(const ucschar* str,
